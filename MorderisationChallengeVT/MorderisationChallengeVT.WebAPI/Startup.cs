@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using MorderisationChallengeVT.Business;
 using MorderisationChallengeVT.Contracts.Businesses;
 using MorderisationChallengeVT.Domain.Repositories;
 using MorderisationChallengeVT.Persistence;
+using MorderisationChallengeVT.Persistence.Extensions;
 using MorderisationChallengeVT.Persistence.Repositories;
 
 namespace MorderisationChallengeVT.WebAPI
@@ -24,6 +24,8 @@ namespace MorderisationChallengeVT.WebAPI
                 var connectionString = _configuration.GetConnectionString("Database");
 
                 x.UseSqlServer(connectionString);
+
+                x.RegisterDbContextTrigger();
             });
 
             services.AddControllers();
@@ -35,15 +37,13 @@ namespace MorderisationChallengeVT.WebAPI
                     builder.AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials()
-                        .WithOrigins("http://localhost:8080");
+                        .WithOrigins("http://localhost:8080", "https://localhost:8080");
                 });
             });
 
             services.AddEndpointsApiExplorer();
 
             services.AddSwaggerGen();
-
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddTransient<ITaskRepository, TaskRepository>();
             services.AddTransient<ITaskBusiness, TaskBusiness>();
@@ -60,9 +60,11 @@ namespace MorderisationChallengeVT.WebAPI
                 app.UseSwaggerUI();
             }
 
+            app.UseHttpsRedirection();
+
             app.UseCors("VueCorsPolicy");
 
-            app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseRouting();
 

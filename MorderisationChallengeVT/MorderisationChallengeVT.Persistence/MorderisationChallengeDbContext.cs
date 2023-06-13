@@ -20,6 +20,7 @@ namespace MorderisationChallengeVT.Persistence
         {
             var entity = modelBuilder.Entity<Domain.Entities.Task>().ToTable("Tasks");
             entity.HasKey(x => x.Id);
+            entity.HasQueryFilter(x => !x.DateDeleted.HasValue);
             entity.Property(x => x.Id).IsRequired().ValueGeneratedOnAdd();
             entity.Property(x => x.DateCreated).IsRequired();
             entity.Property(x => x.DateModified).IsRequired();

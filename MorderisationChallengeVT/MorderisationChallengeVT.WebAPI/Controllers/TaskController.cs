@@ -55,10 +55,10 @@ namespace MorderisationChallengeVT.WebAPI.Controllers
             return Ok();
         }
 
-        [HttpPost("complete/{id}")]
-        public async Task<IActionResult> Complete(int id)
+        [HttpPost("complete")]
+        public async Task<IActionResult> Complete(TaskDTO task)
         {
-            await _taskBusiness.CompleteTask(id);
+            await _taskBusiness.CompleteTask(task);
 
             return Ok();
         }

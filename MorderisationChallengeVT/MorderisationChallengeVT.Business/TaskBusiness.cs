@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MorderisationChallengeVT.Contracts.Businesses;
+﻿using MorderisationChallengeVT.Contracts.Businesses;
 using MorderisationChallengeVT.Contracts.DTOs;
 using MorderisationChallengeVT.Domain.Repositories;
 
@@ -8,47 +7,75 @@ namespace MorderisationChallengeVT.Business
     public class TaskBusiness : ITaskBusiness
     {
         private readonly ITaskRepository _taskRepository;
-        private readonly IMapper _mapper;
 
-        public TaskBusiness(ITaskRepository taskRepository,
-            IMapper mapper)
+        public TaskBusiness(ITaskRepository taskRepository)
         {
             this._taskRepository = taskRepository;
-            this._mapper = mapper;
         }
 
         public Task<List<TaskDTO>> List()
         {
             var tasks = _taskRepository.List().ToList();
 
-            var result = _mapper.Map<List<TaskDTO>>(tasks);
+            var result = tasks.Select(x => new TaskDTO
+            {
+                Id = x.Id,
+                Completed = x.Completed,
+                Details = x.Details
+            }).ToList();
 
             return Task.FromResult(result);
         }
 
-        public Task<TaskDTO> GetById(int id)
+        public Task<TaskDTO?> GetById(int id)
         {
             var task = _taskRepository.List().FirstOrDefault(x => x.Id == id);
 
-            return Task.FromResult(_mapper.Map<TaskDTO>(task));
+            TaskDTO? result = null;
+            if (task != null)
+            {
+                result = new TaskDTO
+                {
+                    Id = task.Id,
+                    Details = task.Details,
+                    Completed = task.Completed,
+                    DateCreated = task.DateCreated,
+                    DateDeleted = task.DateDeleted,
+                    DateModified = task.DateModified
+                };
+            }
+
+            return Task.FromResult(result); ;
         }
 
-        public async Task Create(TaskDTO task)
+        public async Task Create(TaskDTO taskDto)
         {
-            var entity = this._mapper.Map<Domain.Entities.Task>(task);
-            
-            _taskRepository.Create(entity);
+            var task = new Domain.Entities.Task
+            {
+                Details = taskDto.Details,
+                Completed = false,
+
+                // Look strange that we have to update DateModified at creating new
+                // So I just update the data for DateCreated in AuditableTrigger, and keep this code Create function.
+                DateModified = DateTime.Now
+            };
+
+            _taskRepository.Create(task);
 
             await _taskRepository.SaveChanges();
         }
 
         public async Task Update(TaskDTO task)
         {
-            var entity = _mapper.Map<Domain.Entities.Task>(task);
+            var currentTask = _taskRepository.List().FirstOrDefault(x => x.Id == task.Id);
+            if (currentTask != null)
+            {
+                currentTask.Details = task.Details;
 
-            _taskRepository.Update(entity);
+                _taskRepository.Update(currentTask);
 
-            await _taskRepository.SaveChanges();
+                await _taskRepository.SaveChanges();
+            }
         }
 
         public async Task Delete(int taskId)
@@ -58,14 +85,14 @@ namespace MorderisationChallengeVT.Business
             await _taskRepository.SaveChanges();
         }
 
-        public async Task CompleteTask(int id)
+        public async Task CompleteTask(TaskDTO task)
         {
-            var task = _taskRepository.List().FirstOrDefault(x => x.Id == id);
+            var currentTask = _taskRepository.List().FirstOrDefault(x => x.Id == task.Id);
 
-            if (task != null)
+            if (currentTask != null)
             {
-                task.Completed = true;
-                _taskRepository.Update(task);
+                currentTask.Completed = task.Completed;
+                _taskRepository.Update(currentTask);
              
                 await _taskRepository.SaveChanges();
             }

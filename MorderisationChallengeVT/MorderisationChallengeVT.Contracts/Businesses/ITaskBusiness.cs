@@ -6,7 +6,7 @@ namespace MorderisationChallengeVT.Contracts.Businesses
     {
         Task<List<TaskDTO>> List();
 
-        Task<TaskDTO> GetById(int id);
+        Task<TaskDTO?> GetById(int id);
 
         Task Create(TaskDTO task);
 
@@ -14,6 +14,6 @@ namespace MorderisationChallengeVT.Contracts.Businesses
 
         Task Delete(int id);
 
-        Task CompleteTask(int id);
+        Task CompleteTask(TaskDTO task);
     }
 }
