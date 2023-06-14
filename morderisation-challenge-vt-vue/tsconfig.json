@@ -14,7 +14,8 @@
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "webpack-env"
+      "webpack-env",
+      "types/v-click-outside.d.ts"
     ],
     "paths": {
       "@/*": [

@@ -28,12 +28,16 @@
               <span
                 class="popup_menu"
                 :class="{ focus: isFocus(task.id) }"
-                @click="focus(task.id)"
+                @click="focus(task.id, $event)"
                 :key="task.id"
               >
-                <span v-if="isFocus(task.id)">
+                <span
+                  v-if="isFocus(task.id)"
+                  :style="popupMenuStyle"
+                  v-click-outside="unfocus"
+                >
                   <RouterLink :to="`/update/${task.id}`">Edit</RouterLink>
-                  <a href="#" @click="deleteTask(task.id)">Delete</a>
+                  <a href="#" @click="deleteTask(task.id, $event)">Delete</a>
                 </span>
               </span>
             </td>
@@ -59,8 +63,11 @@ import ApiService from "@/ApiService";
 @Component
 export default class TaskList extends Vue {
   private tasks: Task[] = [];
-  private isShowCommands = false;
   private focusId = -1;
+  private popupMenuPosition = {
+    left: 0,
+    top: 0,
+  };
 
   mounted() {
     this.getAll();
@@ -84,18 +91,44 @@ export default class TaskList extends Vue {
     ApiService.complete(data);
   }
 
-  async deleteTask(id: number) {
-    await ApiService.delete(id);
-
-    this.$router.go(0);
+  async deleteTask(id: number, $event: any) {
+    if (confirm("Are you sure that you want to delete this task?")) {
+      await ApiService.delete(id);
+      this.getAll();
+    } else {
+      this.unfocus();
+      $event.stopPropagation();
+    }
   }
 
-  focus(id: number) {
-    this.focusId = id;
+  focus(id: number, $event: any) {
+    if (typeof id === "number") {
+      this.focusId = id;
+      this.calculatePopupPosition($event);
+    }
+  }
+
+  unfocus() {
+    this.focusId = -1;
   }
 
   isFocus(id: number) {
     return this.focusId === id;
+  }
+
+  calculatePopupPosition($event: any) {
+    if ($event && $event.target) {
+      let focusPosition = $event.target.getBoundingClientRect();
+      if (focusPosition) {
+        this.popupMenuPosition.left = focusPosition.left;
+        this.popupMenuPosition.top =
+          focusPosition.top + focusPosition.height + 1;
+      }
+    }
+  }
+
+  get popupMenuStyle() {
+    return `left:${this.popupMenuPosition.left}px;top:${this.popupMenuPosition.top}px`;
   }
 }
 </script>

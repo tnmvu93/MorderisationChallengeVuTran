@@ -1,33 +1,36 @@
 <template>
   <div>
-    <div class="dialogue" role="dialog">
-      <div style="width: 750px">
-        <div class="header">
-          <a href="#" class="close" @click="close"></a>
-          <h2>{{ title }}</h2>
-        </div>
-        <div class="body">
-          <fieldset class="required">
-            <label>Details</label>
-            <textarea
-              rows="2"
-              cols="20"
-              class="text"
-              style="height: 100px"
-              v-model="task.details"
-            >
-            </textarea>
-          </fieldset>
-        </div>
-        <div class="footer">
-          <p class="commands">
-            <span class="grow"></span>
-            <a class="button hollow" href="#" @click="close">Cancel</a>
-            <a class="button" href="#" @click="save">Save</a>
-          </p>
+    <form @submit.prevent="save" novalidate="true">
+      <div class="dialogue" role="dialog">
+        <div style="width: 750px">
+          <div class="header">
+            <a href="#" class="close" @click="close"></a>
+            <h2>{{ title }}</h2>
+          </div>
+          <div class="body">
+            <fieldset class="required">
+              <label>Details</label>
+              <textarea
+                rows="2"
+                cols="20"
+                class="text"
+                style="height: 100px"
+                v-model="task.details"
+                required
+              >
+              </textarea>
+            </fieldset>
+          </div>
+          <div class="footer">
+            <p class="commands">
+              <span class="grow"></span>
+              <button class="button hollow" @click="close">Cancel</button>
+              <button class="button" type="submit">Save</button>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </form>
     <div class="overlay visible"></div>
   </div>
 </template>
@@ -62,13 +65,15 @@ export default class TaskDetail extends Vue {
   }
 
   async save() {
-    if (this.task.id === null) {
-      await this.createTask();
-    } else {
-      await this.updateTask();
-    }
+    if (this.task.details) {
+      if (this.task.id === null) {
+        await this.createTask();
+      } else {
+        await this.updateTask();
+      }
 
-    this.$router.push({ name: "list" });
+      this.$router.push({ name: "list" });
+    }
   }
 
   // My technical debt here, one request to server when cancel due to my knownledge of closing the modal.
