@@ -26,3 +26,12 @@ Fronted:
 
 Technical debt:
 - When cancelling create/update, a request occurs to reload the TaskList -> I'm still finding the other way to initilize the modal.
+
+How to run:
+- Please open the .sln file by Visual Studio .MordernisationChallengeVT/MordernisationChallengeVT/MordernisationChallengeVT.sln
+- The Run the project
+- Open the Frontend Vue project
+- Open CMD and type "npm install". After that please run "npm run serve" to open the client site.
+- Open the site http://localhost:8080/ . We can use now.
+
+Thanks.
